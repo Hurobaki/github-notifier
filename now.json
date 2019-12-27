@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "github-notifier",
+  "public": true,
+  "builds": [{ "src": "api/**/*.go", "use": "@now/go" }],
+  "routes": [
+    { "src": "/", "dest": "api/index.go" },
+    { "src": "/(.*)", "dest": "api/$1.go" }
+  ],
+  "env": {
+    "DEMO_KEY": "@demo-key"
+  }
+}
