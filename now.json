@@ -2,12 +2,14 @@
   "version": 2,
   "name": "github-notifier",
   "public": true,
-  "builds": [{ "src": "api/**/*.go", "use": "@now/go" }],
+  "builds": [{ "src": "index.go", "use": "@now/go@canary" }],
   "routes": [
-    { "src": "/", "dest": "api/index.go" },
+    { "src": "/", "dest": "index.go" },
     { "src": "/(.*)", "dest": "api/$1.go" }
   ],
   "env": {
-    "DEMO_KEY": "@demo-key"
+    "DEMO_KEY": "@demo-key",
+    "SLACK_URL": "@slack-url",
+    "SECRET_TOKEN": "@secret-token"
   }
 }
