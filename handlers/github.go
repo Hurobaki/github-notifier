@@ -9,6 +9,7 @@ import (
 	"github.com/Hurobaki/github-notifier/networking"
 	"github.com/Hurobaki/github-notifier/types"
 	"github.com/Hurobaki/github-notifier/validator"
+	"log"
 	"net/http"
 	"os"
 )
@@ -32,7 +33,7 @@ func Github(w http.ResponseWriter, r *http.Request) error {
 			fmt.Fprintf(w, "Problem with decoder %s ", err)
 			return err
 		}
-		message, err = formatter.SlackMessage(pr.Action, pr.Information)
+		message, err = formatter.SlackMessage(pr.Action, pr.Information.User, pr.Information)
 
 	case types.PullRequestReviewEvent:
 		pr, err := decoder.GetPullRequestReview(r)
@@ -44,13 +45,15 @@ func Github(w http.ResponseWriter, r *http.Request) error {
 		if pr.Action != types.Submitted {
 			return nil
 		}
-		message, err = formatter.SlackMessage(pr.Action, pr.Information)
+		message, err = formatter.SlackMessage(pr.Action, pr.Review.User, pr.Information)
 	}
 
 	if err != nil {
 		fmt.Fprintf(w, "Problem with message formatter %s ", err)
 		return err
 	}
+
+	log.Println("SLACK URL", os.Getenv("SLACK_URL"))
 	request, err := networking.HttpRequest(http.MethodPost, os.Getenv("SLACK_URL"), message)
 
 	if err != nil {

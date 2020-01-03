@@ -34,13 +34,14 @@ type PullRequest struct {
 }
 
 type PullRequestReviewInformation struct {
-	State string `json:"state"`
+	State string     `json:"state"`
+	User  GithubUser `json:"user"`
 }
 
 type PullRequestInformation struct {
 	Url    string     `json:"html_url"`
 	Id     int        `json:"id"`
-	Title  string     `json:"title"`
 	Number int        `json:"number"`
+	Title  string     `json:"title"`
 	User   GithubUser `json:"user"`
 }

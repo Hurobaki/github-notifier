@@ -23,13 +23,13 @@ func getSlackMessageTitle(status interface{}) string {
 
 //TODO format slack message for either pull_request or pull_request reviewer
 
-func SlackMessage(status interface{}, pr types.PullRequestInformation) ([]byte, error) {
+func SlackMessage(status interface{}, user types.GithubUser, pr types.PullRequestInformation) ([]byte, error) {
 	messageTitle := getSlackMessageTitle(status)
 
-	message, err := json.Marshal(types.SlackBaseMessage{Text: fmt.Sprintf("%s %s", pr.User.Login, messageTitle), Blocks: []interface{}{
+	message, err := json.Marshal(types.SlackBaseMessage{Text: fmt.Sprintf("%s %s", user.Login, messageTitle), Blocks: []interface{}{
 		types.SlackContextElement{Type: "context", Elements: []interface{}{
 			types.SlackImageElement{Type: "image", Image: pr.User.Avatar, Alt: "user image"},
-			types.SlackTextElement{Type: "mrkdwn", Text: fmt.Sprintf("<%s|%s> %s", pr.User.Url, pr.User.Login, messageTitle)},
+			types.SlackTextElement{Type: "mrkdwn", Text: fmt.Sprintf("<%s|%s> %s", user.Url, user.Login, messageTitle)},
 		}},
 		types.SlackSectionElement{Type: "section", Text: types.SlackTextElement{Type: "mrkdwn", Text: fmt.Sprintf("*Pull request* \n *<%s|%s (#%d)>*", pr.Url, pr.Title, pr.Number)}},
 		types.SlackDivider{Type: "divider"},
