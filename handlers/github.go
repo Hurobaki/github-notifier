@@ -14,6 +14,21 @@ import (
 	"os"
 )
 
+var validPullRequestStatus = [...]types.PullRequestStatus{
+	types.Opened, types.Closed, types.Labeled, types.ReviewRequest,
+}
+
+func isValidPullRequestStatus(pr types.PullRequestStatus) bool {
+	for _, status := range validPullRequestStatus {
+		fmt.Println(status)
+		fmt.Println(pr)
+		if status == pr {
+			return true
+		}
+	}
+	return false
+}
+
 func Github(w http.ResponseWriter, r *http.Request) error {
 	if isValid := validator.ValidateSignature(r); isValid == false {
 		fmt.Println("Wrong secret token provided")
@@ -30,10 +45,17 @@ func Github(w http.ResponseWriter, r *http.Request) error {
 	case types.PullRequestEvent:
 		pr, err := decoder.GetPullRequest(r)
 		if err != nil {
+			fmt.Println("Problem with decoder :", err)
 			fmt.Fprintf(w, "Problem with decoder %s ", err)
 			return err
 		}
-		message, err = formatter.SlackMessage(pr.Action, pr.Information.User, pr.Information)
+
+		if isValidStatus := isValidPullRequestStatus(pr.Action); isValidStatus == true {
+			message, err = formatter.SlackMessage(pr.Action, pr.Information.User, pr.Information, pr.Sender)
+		} else {
+			log.Println("Pull request status unsupported ", pr.Action)
+			return errors.New("pull request status unsupported")
+		}
 
 	case types.PullRequestReviewEvent:
 		pr, err := decoder.GetPullRequestReview(r)
@@ -45,10 +67,11 @@ func Github(w http.ResponseWriter, r *http.Request) error {
 		if pr.Action != types.Submitted {
 			return nil
 		}
-		message, err = formatter.SlackMessage(pr.Action, pr.Review.User, pr.Information)
+		message, err = formatter.SlackMessage(pr.Action, pr.Review.User, pr.Information, pr.Sender)
 	}
 
 	if err != nil {
+		log.Println("Problem with message formatter ", err)
 		fmt.Fprintf(w, "Problem with message formatter %s ", err)
 		return err
 	}
@@ -57,6 +80,7 @@ func Github(w http.ResponseWriter, r *http.Request) error {
 	request, err := networking.HttpRequest(http.MethodPost, os.Getenv("SLACK_URL"), message)
 
 	if err != nil {
+		log.Println("Problem with request builder", err)
 		fmt.Fprintf(w, "Problem with request builder %s ", err)
 		return err
 	}
@@ -64,6 +88,7 @@ func Github(w http.ResponseWriter, r *http.Request) error {
 	err = networking.SendSlackMessage(request)
 
 	if err != nil {
+		log.Println("Problem sending slack message ", err)
 		fmt.Fprintf(w, "Problem sending slack message %s", err)
 		return err
 	}

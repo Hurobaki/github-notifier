@@ -20,8 +20,8 @@ type SlackDivider struct {
 }
 
 type SlackContextElement struct {
-	Type     string      `json:"type"`
-	Elements interface{} `json:"elements"`
+	Type     string        `json:"type"`
+	Elements []interface{} `json:"elements"`
 }
 
 type SlackImageElement struct {

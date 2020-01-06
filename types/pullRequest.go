@@ -8,6 +8,7 @@ const (
 	Closed        PullRequestStatus = "closed"
 	Opened        PullRequestStatus = "opened"
 	ReviewRequest PullRequestStatus = "review_requested"
+	Labeled       PullRequestStatus = "labeled"
 )
 
 const (
@@ -25,12 +26,14 @@ type PullRequestReview struct {
 	Action      PullRequestReviewStatus      `json:"action"`
 	Review      PullRequestReviewInformation `json:"review"`
 	Information PullRequestInformation       `json:"pull_request"`
+	Sender      GithubUser                   `json:"sender"`
 }
 
 type PullRequest struct {
 	Action      PullRequestStatus      `json:"action"`
-	Number      string                 `json:"number"`
+	Number      int                    `json:"number"`
 	Information PullRequestInformation `json:"pull_request"`
+	Sender      GithubUser             `json:"sender"`
 }
 
 type PullRequestReviewInformation struct {
@@ -39,9 +42,16 @@ type PullRequestReviewInformation struct {
 }
 
 type PullRequestInformation struct {
-	Url    string     `json:"html_url"`
-	Id     int        `json:"id"`
-	Number int        `json:"number"`
-	Title  string     `json:"title"`
-	User   GithubUser `json:"user"`
+	Url    string             `json:"html_url"`
+	Id     int                `json:"id"`
+	Number int                `json:"number"`
+	Title  string             `json:"title"`
+	User   GithubUser         `json:"user"`
+	Labels []PullRequestLabel `json:"labels"`
+}
+
+type PullRequestLabel struct {
+	Id    int    `json:"id"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }

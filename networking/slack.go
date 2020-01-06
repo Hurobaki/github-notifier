@@ -6,7 +6,6 @@ import (
 )
 
 func SendSlackMessage(req *http.Request) error {
-
 	req.Header.Set(constants.HeaderContentType, "application/json")
 
 	err := Post(req)
